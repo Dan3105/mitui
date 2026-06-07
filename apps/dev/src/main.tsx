@@ -3,9 +3,11 @@ import { createRoot, useKeyboard } from "@opentui/react"
 import { useState } from "react"
 import { LayerOneChatDemo } from "./components/layer-one-chat-demo.tsx"
 import { LayerOneDemo } from "./components/layer-one-demo.tsx"
+import { LayerTwoDemo } from "./components/layer-two-demo.tsx"
 
 function DevApp() {
-  const [activeDemo, setActiveDemo] = useState<"part-1" | "part-2">("part-1")
+  const [activeDemo, setActiveDemo] = useState<"part-1" | "part-2" | "part-3">("part-1")
+  const [layoutVariant, setLayoutVariant] = useState<"fullscreen" | "sidebar" | "sidebar-no-footer">("fullscreen")
 
   useKeyboard((key) => {
     if (key.name === "1") {
@@ -15,9 +17,21 @@ function DevApp() {
     if (key.name === "2") {
       setActiveDemo("part-2")
     }
+
+    if (key.name === "3") {
+      setActiveDemo("part-3")
+    }
   })
 
-  return activeDemo === "part-1" ? <LayerOneDemo /> : <LayerOneChatDemo />
+  if (activeDemo === "part-1") {
+    return <LayerOneDemo />
+  }
+
+  if (activeDemo === "part-2") {
+    return <LayerOneChatDemo />
+  }
+
+  return <LayerTwoDemo variant={layoutVariant} onVariantChange={setLayoutVariant} />
 }
 
 const renderer = await createCliRenderer({

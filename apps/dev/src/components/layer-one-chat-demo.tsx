@@ -1,7 +1,7 @@
 import { RGBA, SyntaxStyle } from "@opentui/core"
 import { useKeyboard } from "@opentui/react"
 import { useCallback, useRef, useState } from "react"
-import { ChatThread, Panel, StatusBar, type ChatMessage, type ChatStatus } from "@path/core"
+import { ChatThread, Panel, StatusBar, type ChatMessage, type ChatStatus } from "@path/core/components"
 
 type LLMRole = Exclude<ChatMessage["role"], "system">
 
@@ -182,6 +182,7 @@ export function LayerOneChatDemo() {
         context="Layer 1 ChatThread - part 2"
         keybindings={[
           { key: "1", label: "component demo" },
+          { key: "3", label: "layout demo" },
           { key: "S", label: "stream" },
           { key: "X", label: "stop" },
           { key: "Tab", label: "prompt" },

@@ -18,12 +18,12 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "paths": {
-      "@path/core": [
-        "./packages/core/src/index.ts"
+      "@path/core/components": [
+        "./packages/core/components/index.ts"
       ],
-      "@path/core/*": [
-        "./packages/core/src/*"
-      ]
+      "@path/core/layouts": [
+        "./packages/core/layouts/index.ts"
+      ],
     },
     "noEmit": true,
     // Best practices

@@ -26,14 +26,15 @@
 ```
 mitui/
 ├── packages/
-│   ├── core/              # Base components wrapping @opentui/core
-│   ├── layouts/           # Named layout shells with plugin slots
-│   ├── plugins/           # Work-domain plugins
-│   │   ├── ai/
-│   │   ├── vault/
-│   │   ├── code/
-│   │   ├── tasks/
-│   │   └── monitor/
+│   ├── core/              # Base components, layouts, and plugins
+│   │   ├── components/
+│   │   ├── layouts/
+│   │   └── plugins/
+│   │       ├── ai/
+│   │       ├── vault/
+│   │       ├── code/
+│   │       ├── tasks/
+│   │       └── monitor/
 │   └── agent-skill/       # SKILL.md consumed by coding agents
 ├── apps/
 │   └── dev/               # Live dev harness for isolated component testing
@@ -43,10 +44,10 @@ mitui/
 
 ---
 
-## Layer 1 — `packages/core` (Base Components)
+## Layer 1 — `packages/core/components` (Base Components)
 
 All components wrap OpenTUI primitives with opinionated defaults.
-Shared adapter interfaces exported from `packages/core/src/types/adapter.ts`.
+Shared adapter interfaces are exported from `packages/core/components` as the package evolves.
 
 | Component | Wraps (OpenTUI) | Purpose |
 |---|---|---|
@@ -65,19 +66,21 @@ No component imports a specific SDK (Anthropic, fs, git, etc.) directly.
 
 ---
 
-## Layer 2 — `packages/layouts`
+## Layer 2 — `packages/core/layouts`
 
 Terminal layouts are constrained by the character grid — no sub-character positioning, no overlapping regions, fixed width. Keep layouts simple and composable.
 
-Two layouts in scope. Others deferred until there's a clear need.
+Layouts are blueprint components. They define regions and sizing with plain JSX `<box>` primitives, and callers fill those regions by passing `ReactNode` props. No plugin registry is involved at this layer.
+
+Two layouts are in scope. Others are deferred until there is a clear need.
 
 ```
-FullscreenLayout  →  slots: main, statusbar
-SidebarLayout     →  slots: sidebar, main, statusbar
+FullscreenLayout  →  regions: main, footer
+SidebarLayout     →  regions: sidebar, main, footer
 ```
 
 **`FullscreenLayout`**
-One region fills the entire terminal. `statusbar` is a fixed single-line strip at the bottom. Use when a single plugin owns the full screen (ai-plugin, code-plugin).
+One region fills the entire terminal. `footer` is an optional fixed single-line strip at the bottom that collapses when absent.
 
 ```
 ┌─────────────────────────┐
@@ -85,12 +88,12 @@ One region fills the entire terminal. `statusbar` is a fixed single-line strip a
 │          main           │
 │                         │
 ├─────────────────────────┤
-│         statusbar       │
+│         footer          │
 └─────────────────────────┘
 ```
 
 **`SidebarLayout`**
-Fixed-width left sidebar + flexible right main area. `statusbar` at the bottom spans full width. Sidebar width is configurable (default: 30% or fixed columns). Use when you need navigation or context alongside a primary view (vault-plugin + code-plugin, tasks-plugin + ai-plugin).
+Fixed-width left sidebar + flexible right main area. `footer` spans the full width when present. Sidebar width is a fixed column count with a default of `40`.
 
 ```
 ┌────────┬────────────────┐
@@ -98,18 +101,18 @@ Fixed-width left sidebar + flexible right main area. `statusbar` at the bottom s
 │sidebar │      main      │
 │        │                │
 ├────────┴────────────────┤
-│         statusbar       │
+│         footer          │
 └─────────────────────────┘
 ```
 
-**Composition note:** complex layouts are built by nesting — put a second layout inside a slot rather than creating a new top-level layout. For example, `SidebarLayout` with an `HSplit` inside `main` is two panels side by side on the right. This keeps the layout primitives minimal.
+**Composition note:** complex layouts are built by nesting — put a second layout or split inside `main` rather than creating a new top-level layout. This keeps the layout primitives minimal.
 
 ---
 
-## Layer 3 — `packages/plugins`
+## Layer 3 — `packages/core/plugins`
 
 Each plugin = `adapter(s)` + `component` + slot registration.
-Components live in `packages/core`. Plugins wire adapters to components and register into slots.
+Components live in `packages/core/components`. Plugins wire adapters to components and register into slots.
 
 ### Plugin architecture pattern
 
@@ -117,8 +120,8 @@ Components live in `packages/core`. Plugins wire adapters to components and regi
 plugin/
   adapters/
     <source>.ts    ← implements the adapter interface for one data source
-  types.ts         ← adapter interface (also re-exported from packages/core/types)
-  component.ts     ← renders using packages/core components, accepts adapter
+  types.ts         ← adapter interface (also re-exported from packages/core/components/types)
+  component.ts     ← renders using packages/core/components, accepts adapter
   index.ts         ← registers into slot registry
 ```
 
@@ -298,7 +301,7 @@ interface TaskAdapter {
 
 ### `monitor-plugin`
 
-**Slot:** `footer` or `statusbar`
+**Slot:** `footer`
 
 **What it does:**
 Polls system metrics at a configurable interval. Renders compact `MetricBar` rows.
@@ -355,14 +358,13 @@ about structure, naming, or wiring.
 |---|---|---|
 | 1 | `apps/dev` — harness only, no components yet | Nothing |
 | 2 | `packages/core` — base components, adapter interfaces, no plugins | Nothing |
-| 3 | Decide React vs Solid binding | Required before layouts |
-| 4 | `packages/layouts` — shells + slot definitions | Core done |
-| 5 | `packages/plugins/tasks` — simplest plugin, no external API | Layouts done |
-| 6 | `packages/plugins/vault` — file system + Graphify | Layouts done |
-| 7 | `packages/plugins/code` — file reading + git diff | Layouts done |
-| 8 | `packages/plugins/monitor` — systeminformation | Layouts done |
-| 9 | `packages/plugins/ai` — LLM adapters | Layouts done |
-| 10 | `packages/agent-skill` — write as you build, finalize last | All plugins done |
+| 3 | `packages/core/layouts` — layout blueprints with named regions | Core done |
+| 4 | `packages/core/plugins/tasks` — simplest plugin, no external API | Layouts done |
+| 5 | `packages/core/plugins/vault` — file system + Graphify | Layouts done |
+| 6 | `packages/core/plugins/code` — file reading + git diff | Layouts done |
+| 7 | `packages/core/plugins/monitor` — systeminformation | Layouts done |
+| 8 | `packages/core/plugins/ai` — LLM adapters | Layouts done |
+| 9 | `packages/agent-skill` — write as you build, finalize last | All plugins done |
 
 ---
 
@@ -380,7 +382,6 @@ about structure, naming, or wiring.
 
 ## Open Decisions
 
-- [ ] React vs Solid binding (gates `packages/layouts`)
 - [ ] Event bus implementation for cross-plugin communication (`fileSelected`, `taskCountChanged`, etc.) — evaluate OpenTUI's notification system vs a simple EventEmitter
 - [ ] Persistence layer for tasks (in-memory per session vs writing back to file on every toggle)
 - [ ] Package naming: `@mitui/*` or a real name

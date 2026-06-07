@@ -11,7 +11,7 @@ import {
   type CommandPaletteItem,
   type TaskItem,
   type TreeNode,
-} from "@path/core"
+} from "@path/core/components"
 
 const markdownStyle = SyntaxStyle.create()
 
@@ -134,6 +134,7 @@ export function LayerOneDemo() {
         keybindings={[
           { key: "Ctrl+C", label: "quit" },
           { key: "2", label: "chat demo" },
+          { key: "3", label: "layout demo" },
         ]}
       />
     </box>
