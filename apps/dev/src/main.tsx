@@ -3,10 +3,11 @@ import { createRoot, useKeyboard } from "@opentui/react"
 import { useState } from "react"
 import { LayerOneChatDemo } from "./components/layer-one-chat-demo.tsx"
 import { LayerOneDemo } from "./components/layer-one-demo.tsx"
+import { LayerThreeAiDemo } from "./components/layer-three-ai-demo.tsx"
 import { LayerTwoDemo } from "./components/layer-two-demo.tsx"
 
 function DevApp() {
-  const [activeDemo, setActiveDemo] = useState<"part-1" | "part-2" | "part-3">("part-1")
+  const [activeDemo, setActiveDemo] = useState<"part-1" | "part-2" | "part-3" | "part-4">("part-1")
   const [layoutVariant, setLayoutVariant] = useState<"fullscreen" | "sidebar" | "sidebar-no-footer">("fullscreen")
 
   useKeyboard((key) => {
@@ -21,6 +22,10 @@ function DevApp() {
     if (key.name === "3") {
       setActiveDemo("part-3")
     }
+
+    if (key.name === "4") {
+      setActiveDemo("part-4")
+    }
   })
 
   if (activeDemo === "part-1") {
@@ -31,7 +36,11 @@ function DevApp() {
     return <LayerOneChatDemo />
   }
 
-  return <LayerTwoDemo variant={layoutVariant} onVariantChange={setLayoutVariant} />
+  if (activeDemo === "part-3") {
+    return <LayerTwoDemo variant={layoutVariant} onVariantChange={setLayoutVariant} />
+  }
+
+  return <LayerThreeAiDemo />
 }
 
 const renderer = await createCliRenderer({

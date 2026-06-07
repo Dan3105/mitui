@@ -24,6 +24,12 @@
       "@path/core/layouts": [
         "./packages/core/layouts/index.ts"
       ],
+      "@path/core/plugins": [
+        "./packages/core/plugins/index.ts"
+      ],
+      "@path/core/plugins/ai": [
+        "./packages/core/plugins/ai/index.ts"
+      ],
     },
     "noEmit": true,
     // Best practices
