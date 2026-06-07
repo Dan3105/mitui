@@ -1,0 +1,14 @@
+{
+  "name": "mitui",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --cwd apps/dev dev"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "dependencies": {
+    "@types/react": "^19.2.17"
+  }
+}

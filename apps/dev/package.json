@@ -1,0 +1,8 @@
+{
+  "name": "@mitui/dev",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/main.tsx"
+  }
+}
