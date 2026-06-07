@@ -16,7 +16,7 @@
 | Runtime | Bun (OpenTUI is Bun-exclusive; Node support in-progress upstream) |
 | Language | TypeScript |
 | Package manager | pnpm (Bun as runtime) |
-| Framework binding | TBD — React or Solid (decide before `packages/layouts`) |
+| Framework binding | React |
 | Monorepo | pnpm workspaces |
 
 ---
@@ -67,16 +67,42 @@ No component imports a specific SDK (Anthropic, fs, git, etc.) directly.
 
 ## Layer 2 — `packages/layouts`
 
-Named shells built from `Panel` + `StatusBar` using OpenTUI's `createCoreSlotRegistry`.
-Each shell defines named slot mount points. Plugins fill slots at runtime.
+Terminal layouts are constrained by the character grid — no sub-character positioning, no overlapping regions, fixed width. Keep layouts simple and composable.
+
+Two layouts in scope. Others deferred until there's a clear need.
 
 ```
-DashboardLayout   →  slots: sidebar, main, statusbar, footer
-SplitLayout       →  slots: left, right, statusbar
 FullscreenLayout  →  slots: main, statusbar
+SidebarLayout     →  slots: sidebar, main, statusbar
 ```
 
-> Layout decision (React vs Solid) gates this layer. Build Layer 1 first.
+**`FullscreenLayout`**
+One region fills the entire terminal. `statusbar` is a fixed single-line strip at the bottom. Use when a single plugin owns the full screen (ai-plugin, code-plugin).
+
+```
+┌─────────────────────────┐
+│                         │
+│          main           │
+│                         │
+├─────────────────────────┤
+│         statusbar       │
+└─────────────────────────┘
+```
+
+**`SidebarLayout`**
+Fixed-width left sidebar + flexible right main area. `statusbar` at the bottom spans full width. Sidebar width is configurable (default: 30% or fixed columns). Use when you need navigation or context alongside a primary view (vault-plugin + code-plugin, tasks-plugin + ai-plugin).
+
+```
+┌────────┬────────────────┐
+│        │                │
+│sidebar │      main      │
+│        │                │
+├────────┴────────────────┤
+│         statusbar       │
+└─────────────────────────┘
+```
+
+**Composition note:** complex layouts are built by nesting — put a second layout inside a slot rather than creating a new top-level layout. For example, `SidebarLayout` with an `HSplit` inside `main` is two panels side by side on the right. This keeps the layout primitives minimal.
 
 ---
 
